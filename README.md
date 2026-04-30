@@ -169,17 +169,6 @@ monotonicity of retention curves \
 time consistency between events and cohort assignment \
 completeness of cohort data
 
-### Key Findings
-Non-promo users show consistently higher retention and form a stable long-term user base \
-Promo users demonstrate significantly lower retention and rapid drop-off after the first month \
-Aggregated retention masks substantial differences between user segments \
-Some cohorts show non-monotonic retention patterns, suggesting delayed engagement or methodological limitations
-
-### Limitations
-Activity is defined as any user event (may overestimate retention) \
-Possible use of rolling retention instead of strict retention \
-Recent cohorts are incomplete (right censoring)
-
 ### Dashboard
 #### 1. Cohort heatmap
 X: month_number \
@@ -197,14 +186,6 @@ promo vs non-promo
 
 #### 5. Activation delay
 boxplot
-
-### 7. Interpretation layer
-
-“Insights framework”: \
-retention curve shape \
-segment differences \
-cohort trends \
-impact of activation
 
 ### Project Structure
 
