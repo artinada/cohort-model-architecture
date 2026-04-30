@@ -1,1 +1,13 @@
-init
+## Insights
+
+### 1. Retention patterns
+...
+
+### 2. Channel comparison
+...
+
+### 3. Cohort trends
+...
+
+### 4. Data limitations
+...
