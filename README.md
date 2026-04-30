@@ -1,8 +1,12 @@
 # Cohort Model Architecture
 ## Overview
-Measuring user retention (Retention Rate) using Google Sheets and SQL based on cohort analysis
+This project presents an end-to-end cohort analysis model designed to evaluate user retention and behavior over time. \
+The analysis focuses on:
+- user retention by cohort (monthly)
+- comparison between acquisition channels (promo vs non-promo)
+- identification of behavioral patterns and data limitations
 
-### 1. Design Principles
+### Design Principles
 A single source of truth for events (event-level).\
 Clearly separated layers: raw → staging → marts.\
 Explicit definitions: signup, activation, activity.\
@@ -10,7 +14,24 @@ Support for different retention types: strict / rolling.\
 Flexible segmentation: channel, country, device.\
 Full reproducibility (SQL + documentation).
 
-### 2. Data model (tables)
+### Objectives
+Build a reproducible cohort analysis model using SQL \
+Compare retention across user segments \
+Identify patterns in user engagement and long-term retention \
+Highlight potential data biases and limitations
+
+### Methodology
+Steps: \
+Data cleaning and normalization \
+Cohort assignment (by signup month) \
+Aggregation of user activity by month \
+Calculation of retention metrics \
+Segmentation by acquisition channel
+
+Retention is calculated as: ` active_users / cohort_size `
+
+### Data model
+The analysis is based on event-level data:
 #### Raw (ingest)
 `raw.events`
 
@@ -35,19 +56,28 @@ event_ts (UTC, normalized) \
 event_name \
 channel (normalized)
 
+`stg.users_clean`
+
+user_id \
+signup_ts \
+channel (original source or attribution)
+
 #### Core marts (product logic)
+Key transformations: \
+cohort definition based on signup month \
+activity aggregated to monthly level \
+calculation of month offsets (cohort index)
+
 2.1 Activation
 
-`mart.user_activation`
-
+`mart.user_activation` \
 user_id \
 activation_ts (MIN meaningful event) \
 time_to_activation (interval) 
 
 2.2 Activity (evidence of activity)
 
-`mart.user_activity_monthly`
-
+`mart.user_activity_monthly` \
 user_id \
 activity_month (DATE_TRUNC) \
 is_active (1) \
@@ -56,34 +86,25 @@ is_active (1) \
 
 2.3 Cohorts
 
-`mart.user_cohorts`
-
+`mart.user_cohorts` \
 user_id \
 cohort_month (by signup) \
 channel
 
 2.4 Cohort fact table (core of the model)
 
-`mart.cohort_activity`
-
+`mart.cohort_activity` \
 cohort_month \
 activity_month \
 month_number (offset) \
 user_id \
-channel \
+channel
 
 👉 month_number = the difference in months between cohort_month and activity_month
 
-`stg.users_clean`
+#### Metrics
 
-user_id \
-signup_ts \
-channel (original source or attribution)
-
-### 3. Metrics
-
-`mart.cohort_metrics`
-
+`mart.cohort_metrics` \
 cohort_month \
 month_number \
 channel \
@@ -92,7 +113,7 @@ active_users \
 retention_strict \
 retention_rolling 
 
-#### How Metrics Are Calculated
+**How Metrics Are Calculated** \
 *Cohort Size*
 COUNT DISTINCT user_id in cohort_month
 
@@ -102,7 +123,7 @@ The user is active specifically in this month_number
 *Rolling Retention*
 The user is active in this month or any subsequent month
 
-### 4. SQL template (core)
+### SQL template (core)
 Key snippet:
 ```SQL
 WITH cohort_size AS (
@@ -139,7 +160,7 @@ JOIN cohort_size cs USING (cohort_month, channel)
 GROUP BY 1,2,3, cs.users
 ```
 
-### 5. Mandatory “quality checks”
+### Mandatory “quality checks”
 Specific queries/tables:
 
 5.1 Cohort completeness \
@@ -155,7 +176,18 @@ avg/median time_to_activation
 retention not >100% \
 check for user_id duplicates
 
-### 6. Dashboard
+### Key Findings
+Non-promo users show consistently higher retention and form a stable long-term user base \
+Promo users demonstrate significantly lower retention and rapid drop-off after the first month \
+Aggregated retention masks substantial differences between user segments \
+Some cohorts show non-monotonic retention patterns, suggesting delayed engagement or methodological limitations
+
+### Limitations
+Activity is defined as any user event (may overestimate retention) \
+Possible use of rolling retention instead of strict retention \
+Recent cohorts are incomplete (right censoring)
+
+### Dashboard
 #### 1. Cohort heatmap
 X: month_number \
 Y: cohort_month \
@@ -175,8 +207,40 @@ boxplot
 
 ### 7. Interpretation layer
 
-“Insights framework”:
+“Insights framework”: \
 retention curve shape \
 segment differences \
 cohort trends \
 impact of activation
+
+### Project Structure
+
+```
+cohort-analysis-project/
+│
+├── README.md
+│
+├── data/
+│   └── sample_data.csv
+│
+├── sql/
+│   ├── 01_staging.sql
+│   ├── 02_activation.sql
+│   ├── 03_cohorts.sql
+│   ├── 04_retention.sql
+│   └── 05_quality_checks.sql
+│
+├── dashboard/
+│   └── screenshots.png
+│
+├── docs/
+│   └── methodology.md
+│
+└── results/
+    └── insights.md
+```
+
+### Tools
+SQL (PostgreSQL) \
+DBeaver as SQL client \
+Looker Studio
