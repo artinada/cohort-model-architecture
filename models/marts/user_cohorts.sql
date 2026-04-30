@@ -12,8 +12,8 @@ select
   (extract(month FROM e.event_ts) - extract(month FROM u.signup_ts))
   ) as month_offset,
   u.promo_signup_flag
-from users_clean u
-join events_clean e on u.user_id = e.user_id
+from {{ ref('stg_users') }} u  
+join {{ ref('stg_events') }} e on u.user_id = e.user_id
 where
   u.signup_ts is not null
   and e.event_ts >= u.signup_ts
