@@ -17,4 +17,4 @@ SELECT
              'DD-MM-YYYY')
         else null
 	    end as signup_ts
-FROM cohort_users_raw
+FROM {{ ref('users_raw') }}
