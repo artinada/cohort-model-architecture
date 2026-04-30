@@ -123,7 +123,7 @@ The user is active specifically in this month_number
 *Rolling Retention*
 The user is active in this month or any subsequent month
 
-### SQL template (core)
+### SQL template
 Key snippet:
 ```SQL
 WITH cohort_size AS (
@@ -160,21 +160,14 @@ JOIN cohort_size cs USING (cohort_month, channel)
 GROUP BY 1,2,3, cs.users
 ```
 
-### Mandatory “quality checks”
-Specific queries/tables:
-
-5.1 Cohort completeness \
-max(month_number) for each cohort
-
-5.2 Cohort size distribution \
-check for skewness
-
-5.3 Activation delay \
-avg/median time_to_activation
-
-5.4 Data sanity \
-retention not >100% \
-check for user_id duplicates
+### Data Validation
+This project includes a dedicated validation layer to ensure data quality and correctness of analytical outputs. \
+Validation checks include: \
+cohort size consistency \
+retention bounds (0–1) \
+monotonicity of retention curves \
+time consistency between events and cohort assignment \
+completeness of cohort data
 
 ### Key Findings
 Non-promo users show consistently higher retention and form a stable long-term user base \
@@ -221,14 +214,28 @@ cohort-analysis-project/
 ├── README.md
 │
 ├── data/
-│   └── sample_data.csv
+│   ├── events_raw.csv
+│   └── users_raw.csv
 │
-├── sql/
-│   ├── 01_staging.sql
-│   ├── 02_activation.sql
-│   ├── 03_cohorts.sql
-│   ├── 04_retention.sql
-│   └── 05_quality_checks.sql
+├── models/
+│   └── staging/
+│   ├── stg_users.sql
+│   └── stg_events.sql
+│
+│   └── marts/
+│   ├── cohort_activity.sql
+│   ├── cohort_metrics.sql
+│   └── user_cohorts.sql
+│
+│   └── validation/
+│   ├── val_cohort_size.sql
+│   ├── val_retention_bounds.sql
+│   ├── val_monotonicity.sql
+│   ├── val_time_consistency.sql
+│   └── schema.yml
+│
+│   └── analytics/
+│   └── cohort_dashboard.sql
 │
 ├── dashboard/
 │   └── screenshots.png
@@ -243,4 +250,5 @@ cohort-analysis-project/
 ### Tools
 SQL (PostgreSQL) \
 DBeaver as SQL client \
+Google Sheets
 Looker Studio
