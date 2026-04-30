@@ -14,4 +14,4 @@ select
                 )
           else null
         end as event_ts
-from project.cohort_events_raw
+from {{ ref('events_raw') }}
